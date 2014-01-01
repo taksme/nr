@@ -1,0 +1,102 @@
+body {
+	box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	font: 8pt arial;
+}
+
+section.reports {
+	width: 20.5%;
+	div.content {
+		border: 1px solid gray;
+		margin: 5px;
+		height: 95.5%;
+		overflow-y: scroll;
+	}
+	
+	div.report {
+		padding: 1px 5px;
+		height: 1.2em;
+		div.headcode {
+			float: left;
+			width: 6em;
+		}
+		div.punctuality {
+			float: right;
+			width: 3em;
+			text-align: right;
+		}
+	}
+}
+
+.ontime { fill: green; background: #C9FFC9; }
+.nearly { fill: orange; background: #FFFF99; }
+.late { fill: red; background: #FFC9C9; }
+.noreport { fill: lightgray; }
+
+section {
+	-webkit-box-sizing:border-box;
+	float: left;
+	margin: 5px 10;
+	width: 45%;
+	
+	header {
+		text-transform: uppercase;
+		font-weight: bold;
+		font-size: 1.2em;
+		text-align: center;
+	}
+	
+	svg {
+		border: 1px solid gray;
+		margin: 5px;
+		padding: 5px;
+		height: 92%;
+	}
+
+	&.scotland {
+		width: 30%;
+	}
+}
+/*
+section {
+	-webkit-box-sizing:border-box;
+	width: 29%;
+	float: left;
+	margin: 5px 10;
+	
+	header {
+		text-transform: uppercase;
+		font-weight: bold;
+		font-size: 1.2em;
+		text-align: center;
+	}
+	
+	svg {
+		border: 1px solid gray;
+		margin: 5px;
+		padding: 5px;
+		height: 35%;
+	}
+
+	&.national {
+		width: 35%;
+		position: absolute;
+		top: 5px;
+		right: 15px;
+		svg {
+			height: 92%;
+		}
+	}
+	
+	&.london {
+		width: 40%;
+		
+		svg {
+			border: 1px solid gray;
+			margin: 5px;
+			padding: 5px;
+			height: 50%;
+		}
+	}
+}
+*/
