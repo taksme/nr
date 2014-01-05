@@ -3,7 +3,6 @@ package me.taks.nr;
 import java.util.Properties;
 
 import javax.jms.Connection;
-import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Message;

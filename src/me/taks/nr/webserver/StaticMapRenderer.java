@@ -1,8 +1,7 @@
 package me.taks.nr.webserver;
 
-import static io.netty.handler.codec.http.HttpHeaders.isKeepAlive;
+
 import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -10,20 +9,16 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.CharsetUtil;
 
-import java.nio.charset.Charset;
-
 import me.taks.nr.Box;
+import me.taks.nr.Location;
 import me.taks.nr.Locations;
 import me.taks.nr.Point;
 import me.taks.nr.Report;
 import me.taks.nr.ReportViewer;
-import me.taks.nr.Locations.Location;
-import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
 
 public class StaticMapRenderer {
 	private StringBuffer out = new StringBuffer();
@@ -65,7 +60,7 @@ public class StaticMapRenderer {
 		out.append(s);
 	}
 	
-	private void append(Locations.Location l) {
+	private void append(Location l) {
 		Report report = l.getLastReport();
     	long late = report!=null ? report.getTimes().getMinutesDiff() : Long.MAX_VALUE;
     	Point p = l.getLocation();
@@ -98,13 +93,13 @@ public class StaticMapRenderer {
 			size.easting,
 			size.northing
 		));
-		for (Locations.Location l : g) {
+		for (Location l : g) {
 			Report report = l.getLastReport();
 	    	long late = report!=null ? report.getTimes().getMinutesDiff() : Long.MAX_VALUE;
 	    	if (late>60*24)
 			append(l);
 		}
-		for (Locations.Location l : g) {
+		for (Location l : g) {
 			Report report = l.getLastReport();
 	    	long late = report!=null ? report.getTimes().getMinutesDiff() : Long.MAX_VALUE;
 	    	if (late<=60*24)
@@ -114,7 +109,7 @@ public class StaticMapRenderer {
 	}
 
 	public void append(Locations locations) {
-		for (Locations.Location l : locations) {
+		for (Location l : locations) {
 			Point p = l.getLocation();
 			if (null==p) continue;
 			for (Grouping grouping : groupings) {

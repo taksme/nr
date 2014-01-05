@@ -1,7 +1,8 @@
 package me.taks.nr;
 
-import me.taks.nr.Locations.Location;
-import me.taks.nr.Report.Dir;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class ReportViewer {
 	private Report report;
@@ -20,7 +21,11 @@ public class ReportViewer {
 	}
 	
 	public String getDirection() {
-		return report.getDirection().toString();
+		switch (report.getDirection()) {
+		case UP: return "⬆";
+		case DOWN: return "⬇";
+		default: return "";
+		}
 	}
 	
 	public String getEvent() {
@@ -28,15 +33,25 @@ public class ReportViewer {
 	}
 	
 	public String getPerformance() {
-		return report.getTimes().getMinutesAndQuarters();
+		return getPerformance("early", "late", "on time");
+	}
+	public String getPerformance(String early, String late, String onTime) {
+		return report.getTimes().getMinutesAndQuarters(early, late, onTime);
 	}
 	
 	public String getHeadcode() {
 		return report.getTrainId()!=null ? report.getTrainId().substring(2,6) : "xxxx";
 	}
 	
+    private static SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm", Locale.US);
+	public String getExpectedTime() {
+		return dateFormatter.format(new Date(report.getTimes().getStart()));
+	}
+	
 	public String getSummary() {
-		return getHeadcode() + "\t" + getDirection() + "\t" + getEvent() + "\t" + getPerformance()
-				+"\tat "+getLocation()+(getNext()!="" ? "\tfor " + getNext() : "");
+		return String.format("%s\t%s%s %s at %s\n%s for %s",
+				getExpectedTime(), getDirection(), getEvent(), 
+				getPerformance("E", "L", ""), getLocation(),
+				getHeadcode(), getNext());
 	}
 }

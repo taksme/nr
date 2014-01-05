@@ -1,23 +1,6 @@
 package me.taks.nr;
 
 import java.util.Properties;
-import java.util.Random;
-
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
-import me.taks.json.JSONArray;
-import me.taks.json.JSONObject;
-import me.taks.nr.Report.Dir;
-import me.taks.nr.Report.Event;
-
-import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class TestDataReader extends DataReader {
 
@@ -41,7 +24,7 @@ public class TestDataReader extends DataReader {
         	    		",\"planned_timestamp\":\"\",\"actual_timestamp\":\"\"}}]",
     	};
     	for (int i=0; i<10000; i++) {
-    		try { Thread.sleep(5000); } catch (InterruptedException ie) {}
+    		try { Thread.sleep(10000); } catch (InterruptedException ie) {}
     		handleReportMessage(messages[i%messages.length]);
     	}
     }

@@ -31,7 +31,7 @@ public class TimeRange {
 			return (mins>0 ? mins : "")
 					+ (q==1 ? "¼" : q==2 ? "½" : q==3 ? "¾" : "")
 					//+ "min" + ((mins!=1 || q>0) ? "s" : "")
-					+ " " + (actual>expected ? late : early)
+					+ (actual>expected ? late : early)
 			;
 		}
 	}

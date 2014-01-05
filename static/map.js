@@ -10,6 +10,7 @@ $(function() {
   			var r = reports[i];
 	  		if (!r.plannedTs) continue;
 	  		if (!r.loc) continue;
+	  		if (r.evt!="ARRIVAL") continue;
 	  		var minsLate = Math.floor((r.ts-r.plannedTs)/60000);
 	  		var qsLate = Math.floor((r.ts-r.plannedTs)/15000)%4;
 	  		var color = minsLate<=0 ? "ontime" : minsLate<5 ? "nearly" : "late";
@@ -19,8 +20,8 @@ $(function() {
 	  		console.log(color);
 	  		var statuses = ["ontime","nearly","late","noreport"];
 	  		point.attr("class", color); //add/removeClass don't work and we only ever store lateness in class
-	  		var nextAttr = 8000;
-	  		var cb = function() { nextAttr-=400; point.attr("r", nextAttr); if (nextAttr>2000) setTimeout(cb, 50); }
+	  		var nextAttr = 16000;
+	  		var cb = function() { nextAttr-=1000; point.attr("r", nextAttr); if (nextAttr>2000) setTimeout(cb, 50); }
 	  		cb();
 	  		var title = point.find("title").text();
 	  		if (title) title = title.substring(0, title.indexOf("\n"));

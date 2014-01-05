@@ -1,7 +1,5 @@
 package me.taks.nr;
 
-import java.security.Timestamp;
-
 import me.taks.json.JSONObject;
 
 public class Report {
@@ -9,31 +7,32 @@ public class Report {
 	public Report(Reports reports) {
 		this.reports = reports;
 	}
+	private Locations getLocations() { return reports.getLocations(); }
 	public enum Dir { NONE, UP, DOWN };
 	public enum Event { NONE, PASS, ARRIVAL, DEPARTURE };
 	
-	private Locations.Location location;
-	private Locations.Location next;
+	private Location location;
+	private Location next;
 	private TimeRange times = new TimeRange(0, 0);
 	private String trainId;
 	private Dir direction = Dir.NONE;
 	private Event event = Event.NONE;
-	public Locations.Location getLocation() {
+	public Location getLocation() {
 		return location;
 	}
-	public void setLocation(Locations.Location location) {
+	public void setLocation(Location location) {
 		this.location = location;
 	}
 	public void setLocationStanox(String stanox) {
-		setLocation(reports.getLocations().byStanox.get(stanox));
+		setLocation(getLocations().byStanox.get(stanox));
 	}
-	public Locations.Location getNext() {
+	public Location getNext() {
 		return next;
 	}
 	public void setNextStanox(String stanox) {
-		this.next = reports.getLocations().byStanox.get(stanox);
+		this.next = getLocations().byStanox.get(stanox);
 	}
-	public void setNext(Locations.Location next) {
+	public void setNext(Location next) {
 		this.next = next;
 	}
 	public TimeRange getTimes() {

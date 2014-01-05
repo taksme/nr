@@ -1,8 +1,6 @@
 package me.taks.nr.webserver;
 
-import static io.netty.handler.codec.http.HttpHeaders.isKeepAlive;
 import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONNECTION;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -10,21 +8,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.CharsetUtil;
 
-import java.nio.charset.Charset;
-
-import me.taks.json.JSONObject;
-import me.taks.nr.Box;
+import me.taks.nr.Location;
 import me.taks.nr.Locations;
-import me.taks.nr.Point;
-import me.taks.nr.Report;
-import me.taks.nr.ReportViewer;
-import me.taks.nr.Locations.Location;
-import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
 
 public class LocationAPIServer {
 	private StringBuffer out = new StringBuffer();
@@ -40,7 +29,7 @@ public class LocationAPIServer {
 	
 	public void append(Locations locations, boolean mappable) {
 		append("[");
-		for (Locations.Location l : locations) {
+		for (Location l : locations) {
 			if (!mappable || (l.getLocation()!=null && l.getLocation().northing>0))
 				append(l.toJSONString()+",");
 		}

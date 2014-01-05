@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import me.taks.nr.subs.Subscriptions;
 import me.taks.nr.webserver.WebsocketServer;
 
 public class Runner {
@@ -17,14 +18,14 @@ public class Runner {
 		Reports reports = new Reports(locations);
 		Properties props = new Properties();
 		props.load(new FileReader("../nrdata/nr.props"));
-		//props.list(System.out);
+		Subscriptions subs = new Subscriptions(reports, props);
 		new CorpusImporter(locations).process(args[0]);
 		new NaptanImporter(locations).process(args[1]);
 //		for (Locations.Location l: locations)
 //			System.out.println(l.getAtco()+", "+l.getDescription()+", "+l.getEasting()+", "+l.getNorthing()+", "+l.getShortDescription()+", "+l.getStanox()+", "+l.getTiploc()+", "+l.getTla());
 		new Thread(null, new DataReader(reports, props), "data reader").start();
 		//new Thread(null, new TestDataReader(reports, props), "data reader").start();
-		new WebsocketServer(reports, locations, props).run();
+		new WebsocketServer(reports, locations, props, subs).run();
 	}
 
 }

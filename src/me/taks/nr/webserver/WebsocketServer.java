@@ -17,6 +17,7 @@ import me.taks.nr.Locations;
 import me.taks.nr.Report;
 import me.taks.nr.ReportViewer;
 import me.taks.nr.Reports;
+import me.taks.nr.subs.Subscriptions;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -117,6 +118,8 @@ public class WebsocketServer {
 			    res = new StaticMapRenderer(locations).handle(req);
 	        } else if (req.getMethod() == GET && uri.startsWith("/locations")) {
 			    res = new LocationAPIServer(locations).handle(req);
+	        } else if ((req.getMethod() == POST || req.getMethod() == PUT) && uri.startsWith("/sub")) {
+			    res = new SubscribeAPIServer(subs).handle(req);
 		    } else if (req.getMethod() == GET ) {
 		    	res = new StaticFileServer().handle(req);
 		    } else {
@@ -192,12 +195,15 @@ public class WebsocketServer {
 	}
 	public final Reports reports;
 	public final Locations locations;
+	public final Subscriptions subs;
 	private int port = 8080;
 	private ChannelGroup reportSubscribers;
 	
-	public WebsocketServer(final Reports reports, final Locations locations, Properties props) {
+	public WebsocketServer(final Reports reports, final Locations locations, 
+							Properties props, final Subscriptions subs) {
 		this.reports = reports;
 		this.locations = locations;
+		this.subs = subs;
 		
 		reportSubscribers = new DefaultChannelGroup( "websocket-server", ImmediateEventExecutor.INSTANCE);
 		reports.addListDataListener(new ListDataListener() {
