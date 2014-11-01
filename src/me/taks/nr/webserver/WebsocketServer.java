@@ -1,28 +1,17 @@
 package me.taks.nr.webserver;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Properties;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
 
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
-import me.taks.nr.Locations;
 import me.taks.nr.Report;
-import me.taks.nr.ReportViewer;
 import me.taks.nr.Reports;
+import me.taks.nr.location.Locations;
 import me.taks.nr.subs.Subscriptions;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,28 +22,23 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoop;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.ContinuationWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
-import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 
@@ -84,7 +68,7 @@ public class WebsocketServer {
 	        ctx.flush();
 	    }
 
-	    private void handleHttpRequest(final ChannelHandlerContext ctx, FullHttpRequest req)
+		private void handleHttpRequest(final ChannelHandlerContext ctx, FullHttpRequest req)
 	            throws Exception {
 	    	
 	    	HttpResponse res = null;
@@ -121,7 +105,7 @@ public class WebsocketServer {
 	        } else if ((req.getMethod() == POST || req.getMethod() == PUT) && uri.startsWith("/sub")) {
 			    res = new SubscribeAPIServer(subs).handle(req);
 		    } else if (req.getMethod() == GET ) {
-		    	res = new StaticFileServer().handle(req);
+		    	res = StaticFileServer.handle(req);
 		    } else {
 	            res = new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN);
 	        }
@@ -164,23 +148,6 @@ public class WebsocketServer {
 	        	reportSubscribers.add(ctx.channel());
 	        }
 	        //ctx.channel().write(new TextWebSocketFrame(request.toUpperCase()));
-	    }
-
-	    private void sendHttpResponse(
-	            ChannelHandlerContext ctx, FullHttpRequest req, FullHttpResponse res) {
-	        // Generate an error page if response getStatus code is not OK (200).
-	        if (res.getStatus().code() != 200) {
-	            ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
-	            res.content().writeBytes(buf);
-	            buf.release();
-	            setContentLength(res, res.content().readableBytes());
-	        }
-
-	        // Send the response and close the connection if necessary.
-	        ChannelFuture f = ctx.channel().writeAndFlush(res);
-	        if (!isKeepAlive(req) || res.getStatus().code() != 200) {
-	            f.addListener(ChannelFutureListener.CLOSE);
-	        }
 	    }
 
 	    @Override

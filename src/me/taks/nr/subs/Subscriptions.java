@@ -17,7 +17,6 @@ import javax.swing.event.ListDataListener;
 
 import me.taks.json.JSONArray;
 import me.taks.json.JSONObject;
-import me.taks.json.JSONTokener;
 import me.taks.nr.Report;
 import me.taks.nr.Reports;
 
@@ -45,10 +44,12 @@ public class Subscriptions extends ArrayList<Subscription> {
 	private void populateFromFile() {
 		populating = true;
 		try {
-			JSONArray array = new JSONArray(new JSONTokener(new FileReader("../nrdata/reports.sub")));
-			for (int i=array.length()-1; i>=0; i--) {
-				add(Subscription.fromJSON(array.getJSONArray(i)));
+			BufferedReader reader = new BufferedReader(new FileReader("../nrdata/reports.sub"));
+			String line;
+			while (null != (line = reader.readLine())) {
+				add(Subscription.fromJSON(new JSONArray(line)));
 			}
+			reader.close();
 		} catch (IOException ie) {
 			System.out.println("failed to load subscriptions from file");
 		}
@@ -58,10 +59,8 @@ public class Subscriptions extends ArrayList<Subscription> {
 	private void writeToFile() {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter("../nrdata/reports.sub"));
-			writer.write("[");
 			for (Subscription s: this)
-				writer.write(s.toJSONString()+",");
-			writer.write("]");
+				writer.write(s.toJSONString());
 			writer.close();
 		} catch (IOException ie) { System.out.println("Failed to write subscription file"); }
 	}

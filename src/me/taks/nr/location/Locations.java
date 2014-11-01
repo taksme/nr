@@ -1,7 +1,8 @@
-package me.taks.nr;
+package me.taks.nr.location;
 
 import java.util.Hashtable;
 import java.util.Vector;
+
 
 
 @SuppressWarnings("serial")

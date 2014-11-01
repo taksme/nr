@@ -1,6 +1,8 @@
 package me.taks.nr;
 
+import java.util.Calendar;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import javax.jms.Connection;
 import javax.jms.ExceptionListener;
@@ -26,15 +28,17 @@ public class DataReader implements ExceptionListener, Runnable {
 		this.reports = reports;
 		this.props = props;
 	}
-	public long longOr0(String in) {
-		return longOrDefault(in, 0);
-	}
-	public long longOrDefault(String in, long defaultValue) {
-		try { 
-			return Long.parseLong(in); 
-		} catch (NumberFormatException e) {
-			return defaultValue;
-		}
+	
+	private static final TimeZone GMTBST = TimeZone.getTimeZone("Europe/London");
+	
+	private static long getStartOfDay(Long millis) {
+		Calendar cal = Calendar.getInstance(GMTBST);
+		cal.setTimeInMillis(millis);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+	    cal.set(Calendar.MINUTE, 0);
+	    cal.set(Calendar.SECOND, 0);
+	    cal.set(Calendar.MILLISECOND, 0);
+	    return millis - cal.getTimeInMillis();
 	}
 	
 	protected void handleReportMessage(String message) {
@@ -43,34 +47,31 @@ public class DataReader implements ExceptionListener, Runnable {
 			JSONObject o = array.getJSONObject(j);
 			o = o.getJSONObject("body");
 			Report r = new Report(reports);
-			if (o.has("next_report_stanox")) {
-				r.setNextStanox(o.getString("next_report_stanox"));
-			}
-			if (o.has("direction_ind")) {
-				String d = o.getString("direction_ind");
-				r.setDirection("DOWN".equals(d) ? Dir.DOWN : "UP".equals(d) ? Dir.UP : Dir.NONE);
-			}
-			if (o.has("event_type")) {
-				String e = o.getString("event_type");
-				r.setEvent("ARRIVAL".equals(e) ? Event.ARRIVAL :
-							"DEPARTURE".equals(e) ? Event.DEPARTURE:
-							"PASS".equals(e) ? Event.PASS:
-								Event.NONE
-				);
-			}
-			r.setTimes(o.has("planned_timestamp") ? longOr0(o.getString("planned_timestamp")) : 0, 
-						o.has("actual_timestamp") ? longOr0(o.getString("actual_timestamp")) : 0
+
+			r.setTrainId(o.getString("train_id", ""));
+			r.setLocationStanox(o.getString("loc_stanox", ""));
+			r.setNextStanox(o.getString("next_report_stanox", ""));
+
+			String d = o.getString("direction_ind", "");
+			r.setDirection("DOWN".equals(d) ? Dir.DOWN : "UP".equals(d) ? Dir.UP : Dir.NONE);
+
+			String e = o.getString("event_type", "");
+			r.setEvent("ARRIVAL".equals(e) ? Event.ARRIVAL :
+						"DEPARTURE".equals(e) ? Event.DEPARTURE:
+						"PASS".equals(e) ? Event.PASS:
+							Event.NONE
 			);
-			if (o.has("train_id")) {
-				r.setTrainId(o.getString("train_id"));
-			}
-			if (o.has("loc_stanox")) {
-				r.setLocationStanox(o.getString("loc_stanox"));
-			}
+
+			long expected = o.getQuotedLongOr0("planned_timestamp"), 
+					actual = o.getQuotedLongOr0("actual_timestamp"), 
+					dayStart = getStartOfDay(expected>0 ? expected : actual);
+
+			if (expected>0) r.setExpected(HalfMins.parse(expected, dayStart));
+			if (actual>0) r.setExpected(HalfMins.parse(actual, dayStart));
 			
 			r.ready();
 			
-			System.out.println(new ReportViewer(r).getSummary());
+			System.out.println(ReportViewer.get(r).getSummary());
 		} catch (Exception e) { 
 			System.err.println("Error "+e.getMessage()+array.getJSONObject(j));
 			e.printStackTrace();

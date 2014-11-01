@@ -4,6 +4,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import me.taks.nr.location.CorpusImporter;
+import me.taks.nr.location.Locations;
+import me.taks.nr.location.NaptanImporter;
 import me.taks.nr.subs.Subscriptions;
 import me.taks.nr.webserver.WebsocketServer;
 

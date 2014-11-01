@@ -4,6 +4,9 @@ import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+
+import java.util.Collection;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -14,25 +17,30 @@ import io.netty.util.CharsetUtil;
 
 import me.taks.nr.location.Location;
 import me.taks.nr.location.Locations;
+import me.taks.nr.schedule.Train;
+import me.taks.nr.schedule.Trains;
 
-public class LocationAPIServer {
+public class TrainAPIServer {
 	private StringBuffer out = new StringBuffer();
-	private Locations locations;
+	private Trains trains;
 	
-	public LocationAPIServer(Locations locations) {
-		this.locations = locations;
+	public TrainAPIServer(Trains trains) {
+		this.trains = trains;
 	}
 	
 	public void append(String s) {
 		out.append(s);
 	}
 	
-	public void append(Locations locations, boolean mappable) {
-		append("[");
-		for (Location l : locations) {
-			if (!mappable || (l.getLocation()!=null && l.getLocation().northing>0))
-				append(l.toJSONString()+",");
+	public void overFirst(char c) {
+		out.insert(0, c);
+	}
+	
+	public void append(Collection<Train> trains) {
+		for (Train t : trains) {
+			"," + append(t.toJSONString());
 		}
+		overFirst('[');
 		append("]");
 	}
 	

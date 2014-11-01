@@ -1,9 +1,10 @@
-package me.taks.nr;
+package me.taks.nr.location;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+
 
 import au.com.bytecode.opencsv.CSVReader;
 

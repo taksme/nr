@@ -2,6 +2,8 @@ package me.taks.nr;
 
 import javax.swing.DefaultListModel;
 
+import me.taks.nr.location.Locations;
+
 public class Reports extends DefaultListModel<Report> {
 	/**
 	 * 

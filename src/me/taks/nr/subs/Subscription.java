@@ -47,7 +47,7 @@ public class Subscription {
 		else if ("loc".equals(rule[0]) && report.getLocation()!=null 
 										&& rule[1].equals(report.getLocation().getStanox()))
 			return true;
-		else if ("headcode".equals(rule[0]) && rule[1].equals(new ReportViewer(report).getHeadcode()))
+		else if ("headcode".equals(rule[0]) && rule[1].equals(ReportViewer.get(report).getHeadcode()))
 			return true;
 		else if ("trainId".equals(rule[0]) && rule[1].equals(report.getTrainId()))
 			return true;

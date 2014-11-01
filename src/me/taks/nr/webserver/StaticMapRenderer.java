@@ -14,11 +14,11 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.util.CharsetUtil;
 
 import me.taks.nr.Box;
-import me.taks.nr.Location;
-import me.taks.nr.Locations;
 import me.taks.nr.Point;
 import me.taks.nr.Report;
 import me.taks.nr.ReportViewer;
+import me.taks.nr.location.Location;
+import me.taks.nr.location.Locations;
 
 public class StaticMapRenderer {
 	private StringBuffer out = new StringBuffer();
@@ -76,7 +76,7 @@ public class StaticMapRenderer {
 			cleanForAttr(l.getDescription()),
 			p.easting, 
 			-p.northing, 
-	    	report!=null ? cleanForAttr(new ReportViewer(report).getSummary()) : "No Report"
+	    	report!=null ? cleanForAttr(ReportViewer.get(report).getSummary()) : "No Report"
     	));
 	}
 	

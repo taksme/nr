@@ -30,6 +30,7 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -38,6 +39,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+
+import me.taks.nr.HalfMins;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
@@ -92,7 +95,36 @@ import java.util.Set;
  * @author JSON.org
  * @version 2013-06-17
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class JSONObject {
+	
+	public long getQuotedLongOr0(String key) {
+		return getQuotedLong(key, 0);
+	}
+	
+	public long getQuotedLong(String key, long defaultValue) {
+		try { 
+			return Long.parseLong(getString(key, "")); 
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+	
+	public short getHalfMins(String key) {
+		return HalfMins.parse(getString(key, ""));
+	}
+
+	static SimpleDateFormat df = new SimpleDateFormat("y-M-d");
+	public long getYMD(String key) {
+		try {
+			return df.parse(getString(key)).getTime();
+		} catch (Exception e) { return 0; }
+	}
+	
+	public String getString(String key, String defaultValue) {
+		return has(key) ? getString(key) : defaultValue;
+	}
+	
     /**
      * JSONObject.NULL is equivalent to the value that JavaScript calls null,
      * whilst Java's null is equivalent to the value that JavaScript calls
@@ -135,7 +167,7 @@ public class JSONObject {
     /**
      * The map where the JSONObject's properties are kept.
      */
-    private final Map map;
+	private final Map map;
 
     /**
      * It is sometimes more convenient and less ambiguous to have a
@@ -624,7 +656,7 @@ public class JSONObject {
      *
      * @return An array of field names, or null if there are no names.
      */
-    public static String[] getNames(Object object) {
+	public static String[] getNames(Object object) {
         if (object == null) {
             return null;
         }
@@ -977,7 +1009,7 @@ public class JSONObject {
         return NULL.equals(object) ? defaultValue : object.toString();
     }
 
-    private void populateMap(Object bean) {
+	private void populateMap(Object bean) {
         Class klass = bean.getClass();
 
 // If klass is a System class then set includeSuperClass to false.

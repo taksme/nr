@@ -1,4 +1,4 @@
-package me.taks.nr;
+package me.taks.nr.location;
 
 import java.io.BufferedWriter;
 import java.io.File;

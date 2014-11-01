@@ -1,6 +1,8 @@
-package me.taks.nr;
+package me.taks.nr.location;
 
 import me.taks.json.JSONObject;
+import me.taks.nr.Point;
+import me.taks.nr.Report;
 
 public class Location {
 	/**
