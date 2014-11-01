@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import me.taks.nr.HalfMins;
+import me.taks.nr.schedule.HalfMins;
 
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
@@ -110,8 +110,8 @@ public class JSONObject {
 		}
 	}
 	
-	public short getHalfMins(String key) {
-		return HalfMins.parse(getString(key, ""));
+	public int getHalfMins(String key) {
+		return HalfMins.build(getString(key, ""));
 	}
 
 	static SimpleDateFormat df = new SimpleDateFormat("y-M-d");
@@ -123,6 +123,10 @@ public class JSONObject {
 	
 	public String getString(String key, String defaultValue) {
 		return has(key) ? getString(key) : defaultValue;
+	}
+	
+	public JSONObject getJSONObjectOrEmpty(String key) {
+		return isNull(key) ? new JSONObject() : getJSONObject(key);
 	}
 	
     /**

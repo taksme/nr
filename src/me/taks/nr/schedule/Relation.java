@@ -1,6 +1,6 @@
 package me.taks.nr.schedule;
 
-public class Relation extends Schedule {
+public class Relation {
 	private String mainId;
 	private String assocId;
 	public enum RelationType { DIVIDE, JOIN, NEXT }
@@ -10,19 +10,8 @@ public class Relation extends Schedule {
 	private String tiploc;
 	private String baseLocSuffix;
 	private String assocLocSuffix;
+	private Schedule schedule;
 	
-	public Relation(String mainId, String assocId, RelationType type, Period period,
-						String tiploc, String baseLocSuffix, String assocLocSuffix
-					) {
-		this.mainId = mainId;
-		this.assocId = assocId;
-		this.type = type;
-		this.period = period;
-		this.tiploc = tiploc;
-		this.baseLocSuffix = baseLocSuffix;
-		this.assocLocSuffix = assocLocSuffix;
-	}
-
 	public String getMainId() {
 		return mainId;
 	}
@@ -50,4 +39,56 @@ public class Relation extends Schedule {
 	public String getAssocLocSuffix() {
 		return assocLocSuffix;
 	}
+	
+	public Schedule getSchedule() {
+		return schedule;
+	}
+
+	public static class Builder {
+		private Relation relation = new Relation();
+		
+		public Builder setMainId(String mainId) {
+			relation.mainId = mainId;
+			return this;
+		}
+
+		public Builder setAssocId(String assocId) {
+			relation.assocId = assocId;
+			return this;
+		}
+
+		public Builder setType(RelationType type) {
+			relation.type = type;
+			return this;
+		}
+
+		public Builder setPeriod(Period period) {
+			relation.period = period;
+			return this;
+		}
+
+		public Builder setTiploc(String tiploc) {
+			relation.tiploc = tiploc;
+			return this;
+		}
+
+		public Builder setBaseLocSuffix(String baseLocSuffix) {
+			relation.baseLocSuffix = baseLocSuffix;
+			return this;
+		}
+
+		public Builder setAssocLocSuffix(String assocLocSuffix) {
+			relation.assocLocSuffix = assocLocSuffix;
+			return this;
+		}
+
+		public Builder setSchedule(Schedule schedule) {
+			relation.schedule = schedule;
+			return this;
+		}
+		
+		public Relation build() {
+			return relation;
+		}
+	}	
 }

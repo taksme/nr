@@ -15,8 +15,8 @@ public class Report {
 	
 	private Location location;
 	private Location next;
-	private short expected = HalfMins.INVALID;
-	private short actual = HalfMins.INVALID;
+	private long expected = 0;
+	private long actual = 0;
 	private String trainId;
 	private Dir direction = Dir.NONE;
 	private Event event = Event.NONE;
@@ -38,16 +38,16 @@ public class Report {
 	public void setNext(Location next) {
 		this.next = next;
 	}
-	public short getExpected() {
+	public long getExpected() {
 		return expected;
 	}
-	public void setExpected(short expected) {
+	public void setExpected(long expected) {
 		this.expected = expected;
 	}
-	public short getActual() {
+	public long getActual() {
 		return actual;
 	}
-	public void setActual(short actual) {
+	public void setActual(long actual) {
 		this.actual = actual;
 	}
 	public String getTrainId() {
@@ -69,7 +69,7 @@ public class Report {
 		this.event = event;
 	}
 	public void ready() {
-		if (null!=location && HalfMins.valid(expected)) {
+		if (null!=location && expected>0) {
 			location.setLastReport(this);
 		}
 		reports.reportReady(this); //TODO: listener?
@@ -89,5 +89,9 @@ public class Report {
 			JSONObject.valueToString(location==null ? "" : location.getStanox()),
 			JSONObject.valueToString(next==null ? "" : next.getStanox())
 		);
+	}
+	
+	public long getRealDelay() {
+		return ((expected>0 && actual>0) ? actual - expected : Long.MAX_VALUE);
 	}
 }

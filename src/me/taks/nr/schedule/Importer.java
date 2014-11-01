@@ -11,17 +11,14 @@ import java.util.zip.GZIPInputStream;
 
 import me.taks.json.JSONArray;
 import me.taks.json.JSONObject;
-import me.taks.nr.HalfMins;
-import me.taks.nr.data.PlanFlags;
-import me.taks.nr.data.Schedule.Plan;
-import me.taks.nr.data.Schedule.Plan.Category;
-import me.taks.nr.data.Schedule.Plan.Catering;
-import me.taks.nr.data.Schedule.Plan.PlanLoc;
-import me.taks.nr.data.Schedule.Plan.PlanLocOrBuilder;
-import me.taks.nr.data.Schedule.Plan.Power;
-import me.taks.nr.data.Schedule.Plan.Reservation;
-import me.taks.nr.data.Schedule.Plan.SleeperType;
-import me.taks.nr.data.Schedule.Plan.TrainType;
+import me.taks.nr.schedule.Plan;
+import me.taks.nr.schedule.Plan.Category;
+import me.taks.nr.schedule.Plan.Catering;
+import me.taks.nr.schedule.PlanLoc;
+import me.taks.nr.schedule.Plan.Power;
+import me.taks.nr.schedule.Plan.Reservation;
+import me.taks.nr.schedule.Plan.SleeperType;
+import me.taks.nr.schedule.Plan.TrainType;
 import me.taks.nr.location.CorpusImporter;
 import me.taks.nr.location.Locations;
 import me.taks.nr.location.NaptanImporter;
@@ -81,23 +78,29 @@ public class Importer {
 	}
 	
 	private Relation assocFromJson(JSONObject o) {
-		String mainId = o.getString("main_train_uid");
-		String assocId = o.getString("assoc_train_uid");
 		String c = o.getString("category");
-		RelationType type = e("JJ", c) ? RelationType.JOIN : 
-							e("VV", c) ? RelationType.DIVIDE : RelationType.NEXT;
 		char i = o.getString("date_indicator").charAt(0);
-		Period period = i=='S' ? Period.STANDARD : i=='P' ? Period.PREV_OVERNIGHT : Period.NEXT_OVERNIGHT;
-		String tiploc = o.getString("location");
-		String baseLocSuffix = o.getString("base_location_suffix");
-		String assocLocSuffic = o.getString("assoc_location_suffix");		
-		Relation a = new Relation(mainId, assocId, type, period, tiploc, 
-										baseLocSuffix, assocLocSuffic
-						);
-		a.setStart(getYearsDays(o.getQuotedLongOr0("assoc_start_date")))
-		.setEnd(getYearsDays(o.getQuotedLongOr0("assoc_end_date")))
-		.setDays(getDays(o.getString("assoc_days")));
-		return a;
+		return 
+			new Relation.Builder()
+			.setMainId(o.getString("main_train_uid"))
+			.setAssocId(o.getString("assoc_train_uid"))
+			.setType(
+				e("JJ", c) ? RelationType.JOIN : 
+				e("VV", c) ? RelationType.DIVIDE : RelationType.NEXT
+			)
+			.setPeriod(i=='S' ? Period.STANDARD : i=='P' ? Period.PREV_OVERNIGHT : Period.NEXT_OVERNIGHT)
+			.setTiploc(o.getString("location"))
+			.setBaseLocSuffix(o.getString("base_location_suffix"))
+			.setAssocLocSuffix(o.getString("assoc_location_suffix"))
+			.setSchedule(
+				new Schedule.Builder()
+				.setStart(getYearsDays(o.getQuotedLongOr0("assoc_start_date")))
+				.setEnd(getYearsDays(o.getQuotedLongOr0("assoc_end_date")))
+				.setDays(getDays(o.getString("assoc_days")))
+				.build()
+			)
+			.build()
+		;
 	}
 
 	
@@ -111,46 +114,49 @@ public class Importer {
 	
 	private SleeperType getSleeperType(char st) {
 		return 'B'==st ? SleeperType.BOTH : 'F'==st ? SleeperType.FIRST_ONLY :
-				'S'==st ? SleeperType.STANDARD_ONLY : SleeperType.NO_SLEEPER;
+				'S'==st ? SleeperType.STANDARD_ONLY : SleeperType.NO;
 	}
 	
 	private Reservation getReservationType(char res) {
 		return 'A'==res ? Reservation.COMPULSORY : 'E'==res ? Reservation.BIKES_COMPULSORY :
 				'R'==res ? Reservation.RECOMMENDED : 'S'==res ? Reservation.AVAILABLE :
-				Reservation.NO_RESERVATIONS;
+				Reservation.NO;
 	}
-	
-	private PlanFlags planflags = new PlanFlags();
 	
 	private Plan planFromJson(JSONObject o) {
 		//System.out.println(o.toString()+"\n\n");
-		JSONObject os=o.getJSONObject("schedule_segment");
-		JSONObject on= !o.isNull("new_schedule_segment") ? o.getJSONObject("new_schedule_segment") 
-														: new JSONObject();
-		JSONArray locs = o.has("schedule_location") ? o.getJSONArray("schedule_location") :
-							os.has("schedule_location") ? os.getJSONArray("schedule_location") :
-							null;
-		
-		Plan.Builder plan = Plan.newBuilder()
-		.setId(o.getString("CIF_train_uid"))
-		.setIsDelete(!"Create".equals(o.getString("transaction_type")))
-		.setTrainType(getType(o.getString("train_status").charAt(0)))
-		.setCategory(fromCode(os.getString("CIF_train_category", "")))
-		.setHeadcode(os.getString("signalling_id", ""))
-		.setPortionId(os.getString("CIF_business_sector", ""))
-		.setSleeperType(getSleeperType(os.getString("CIF_sleepers", " ").charAt(0)))
-		.setReservation(getReservationType(os.getString("CIF_reservations", " ").charAt(0)))
-		//enum Catering { TROLLEY, BUFFET, HOT_BUFFET, MEAL_FIRST, RESTAURANT_FIRST, RESTAURANT, WHEELCHAIR }
-		.setCatering(Catering.NO_CATERING) //TODO
-		//.setInternationalUicCode(on.getString("uic_code", ""))
-		.setAtocCode(o.getString("atoc_code", ""));
-		
+		JSONObject os = o.getJSONObject("schedule_segment");
+		JSONObject on = o.getJSONObjectOrEmpty("new_schedule_segment");
+		JSONArray locs = 
+			o.has("schedule_location") ? o.getJSONArray("schedule_location") :
+			os.has("schedule_location") ? os.getJSONArray("schedule_location") :
+			null;
+
 		int len=locs.length();
-		OldPlanLoc[] out = new OldPlanLoc[len];
+		PlanLoc[] planLocs = new PlanLoc[len];
 		for (int i=0; i<len; i++) {
-			plan.addPlanLocs(planLocFromJson(locs.getJSONObject(i)));
+			planLocs[i] = planLocFromJson(locs.getJSONObject(i));
 		}
 
+							
+		String oc = os.getString("CIF_operating_characteristics", "");
+		
+		Plan.Builder plan = new Plan.Builder()
+			.setId(o.getString("CIF_train_uid"))
+			.setDelete(!"Create".equals(o.getString("transaction_type")))
+			.setTrainType(getType(o.getString("train_status").charAt(0)))
+			.setCategory(fromCode(os.getString("CIF_train_category", "")))
+			.setHeadcode(os.getString("signalling_id", ""))
+			.setPortionId(os.getString("CIF_business_sector", ""))
+			.setSleeperType(getSleeperType(os.getString("CIF_sleepers", " ").charAt(0)))
+			.setReservation(getReservationType(os.getString("CIF_reservations", " ").charAt(0)))
+			//enum Catering { TROLLEY, BUFFET, HOT_BUFFET, MEAL_FIRST, RESTAURANT_FIRST, RESTAURANT, WHEELCHAIR }
+			.setCatering(Catering.NO) //TODO
+			//.setInternationalUicCode(on.getString("uic_code", ""))
+			.setAtocCode(o.getString("atoc_code", ""))
+			.setPlanLocs(planLocs)
+		;
+		
 		String p = os.getString("CIF_power_type", "");
 		String tl = os.getString("CIF_timing_load", "");
 		short tll = 0;
@@ -163,54 +169,62 @@ public class Importer {
 							? tll
 							: 0
 						)
-		.setSpeed((short)os.getQuotedLongOr0("CIF_speed"));
+		.setSpeed((short)os.getQuotedLongOr0("CIF_speed"))
 		
-		String oc = os.getString("CIF_operating_characteristics", "");
-		plan.setFlags(
-			planflags.setAll((byte)0)
-			.setGuard(oc.indexOf('G')>=0)
-			.setPushPull(oc.indexOf('P')>=0)
-			.setAsReqd(oc.indexOf('Q')>=0)
-			.setAirCon(oc.indexOf('R')>=0)
-			.setAsReqdToYard(oc.indexOf('Y')>=0)
-			.setLargeGuage(oc.indexOf('Z')>=0)
-			.setHasFirstClass(!"S".equals(os.getString("CIF_train_class", "")))
-			.setPerformanceMonitored("Y".equals(o.getString("applicable_timetable", "")))
-			.getAll()
-		)
-		.setStart(getYearsDays(o.getYMD("schedule_start_date")))
-		.setEnd(getYearsDays(o.getYMD("schedule_end_date")))
-		.setDays(getDays(o.getString("schedule_days_runs")));
+		.setGuard(oc.indexOf('G')>=0)
+		.setPushPull(oc.indexOf('P')>=0)
+		.setAsRequired(oc.indexOf('Q')>=0)
+		.setAirCon(oc.indexOf('R')>=0)
+		.setAsRequiredToYard(oc.indexOf('Y')>=0)
+		.setLargeGuage(oc.indexOf('Z')>=0)
+		.setHasFirstClass(!"S".equals(os.getString("CIF_train_class", "")))
+		.setInternationalUicCode(on.getString("uic_code", ""))
+//		.setPerformanceMonitored("Y".equals(o.getString("applicable_timetable", "")))
+		.setSchedule(
+			new Schedule.Builder()
+			.setStart(getYearsDays(o.getYMD("schedule_start_date")))
+			.setEnd(getYearsDays(o.getYMD("schedule_end_date")))
+			.setDays(getDays(o.getString("schedule_days_runs")))
+			.build()
+		);
 
 		return plan.build();
 	}
 
 	private PlanLoc planLocFromJson(JSONObject o) {
 		String ri = o.getString("record_identity");
-		short departure = 0;
-		OldPlanLoc.Type type;
+		int departure = 0;
+		PlanLoc.Type type;
 		if (e("LO", ri)) {
-			type = OldPlanLoc.Type.ORIGIN;
+			type = PlanLoc.Type.ORIGIN;
 			departure = o.getHalfMins("departure");
 		} else if (e("LT", ri)) {
-			type = OldPlanLoc.Type.DESTINATION;
+			type = PlanLoc.Type.DESTINATION;
 		} else {
 			String passStr = o.getString("pass", "");
 			if (passStr==null) {
-				type = OldPlanLoc.Type.CALLING;
+				type = PlanLoc.Type.CALLING;
 				departure = o.getHalfMins("departure");
 			} else {
-				type = OldPlanLoc.Type.PASSING;
-				departure = HalfMins.parse(passStr);
+				type = PlanLoc.Type.PASSING;
+				departure = HalfMins.build(passStr);
 			}
 		}
-		return new OldPlanLoc(type, locations.getByTiploc(o.getString("tiploc_code", "")), 
-							o.getHalfMins("arrival"), departure, 
-							o.getHalfMins("public_arrival"), o.getHalfMins("public_departure"), 
-							o.getString("platform", ""), o.getString("line", ""), o.getString("path", ""),
-							o.getHalfMins("engineering_allowance"), o.getHalfMins("pathing_allowance"), 
-							o.getHalfMins("performance_allowance")
-		);
+		return new PlanLoc.Builder()
+			.setType(type)
+			.setLoc(locations.getByTiploc(o.getString("tiploc_code", ""))) 
+			.setArrival(o.getHalfMins("arrival"))
+			.setDeparture(departure)
+			.setPublicArrival(o.getHalfMins("public_arrival"))
+			.setPublicDeparture(o.getHalfMins("public_departure"))
+			.setPlatform(o.getString("platform", ""))
+			.setLine(o.getString("line", ""))
+			.setPath(o.getString("path", ""))
+			.setEngineering(o.getHalfMins("engineering_allowance"))
+			.setPathing(o.getHalfMins("pathing_allowance"))
+			.setPerformance(o.getHalfMins("performance_allowance"))
+			.build()
+		;
 	}
 	
 	private Power getPower(String p, String tl) {
@@ -225,11 +239,11 @@ public class Importer {
 						'V'==tl0 ? Power.VOYAGER : Power.DMU_OTHER
 				) : "EMU".equals(p) ? (
 						"AT".equals(tl) ? Power.ACCELERATED_EMU : Power.EMU
-				) : Power.NO_POWER;
+				) : Power.NONE;
 	}
 	
 	private Category fromCode(String code) {
-		if (code==null || code.length()==0) return Category.NO_CATEGORY;
+		if (code==null || code.length()==0) return Category.NONE;
 		if ("JJ".equals(code)) return Category.POST;
 		char s = code.length()>1 ? code.charAt(1) : ' ';
 		switch (code.charAt(0)) {
@@ -265,7 +279,7 @@ public class Importer {
 		case 'A':
 			return Category.TRAINFREIGHT;
 		default:
-			return Category.NO_CATEGORY;
+			return Category.NONE;
 		}
 	}
 	

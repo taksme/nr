@@ -3,8 +3,6 @@ package me.taks.nr.schedule;
 import java.util.Collection;
 import java.util.Hashtable;
 
-import me.taks.nr.data.Schedule.Plan;
-import me.taks.nr.data.Schedule.Plan.PlanLoc;
 import me.taks.nr.location.Location;
 
 import org.apache.commons.collections4.map.MultiValueMap;
@@ -26,12 +24,12 @@ public class Trains {
 			add(train);
 		}
 		else train.add(plan);
-		for (PlanLoc pl : plan.getPlanLocsList()) {
+/*		for (PlanLoc pl : plan.getPlanLocsList()) {
 			Location l = pl.getLocation();
 			if (!byLoc.containsValue(l, train))
 				byLoc.put(l, train);
 		}
-	}
+*/	}
 	
 	public Train getById(String id) {
 		return byId.get(id);

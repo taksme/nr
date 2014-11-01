@@ -34,25 +34,35 @@ public class Schedule {
 	public Type getType() {
 		return type;
 	}
-	public Schedule setStart(int start) {
-		this.start = start;
-		return this;
-	}
-	public Schedule setEnd(int end) {
-		this.end = end;
-		return this;
-	}
-	public Schedule setDays(byte days) {
-		this.days = days;
-		return this;
-	}
-	public Schedule setBankHoliday(BankHoliday bankHoliday) {
-		this.bankHoliday = bankHoliday;
-		return this;
-	}
-	public Schedule setType(Type type) {
-		this.type = type;
-		return this;
-	}
+
+	public static class Builder {
+		private Schedule schedule = new Schedule();
+
+		public Builder setStart(int start) {
+			schedule.start = start;
+			return this;
+		}
+		public Builder setEnd(int end) {
+			schedule.end = end;
+			return this;
+		}
+		public Builder setDays(byte days) {
+			schedule.days = days;
+			return this;
+		}
+		public Builder setBankHoliday(BankHoliday bankHoliday) {
+			schedule.bankHoliday = bankHoliday;
+			return this;
+		}
+		public Builder setType(Type type) {
+			schedule.type = type;
+			return this;
+		}
+		
+		public Schedule build() {
+			return schedule;
+		}
+}
+	
 }
 

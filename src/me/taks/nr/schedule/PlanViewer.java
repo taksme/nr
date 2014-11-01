@@ -1,7 +1,6 @@
 package me.taks.nr.schedule;
 
 import me.taks.nr.ReportViewer;
-import me.taks.nr.data.Schedule.Plan;
 
 public class PlanViewer {
 	public static PlanViewer get(Plan plan) {
@@ -61,9 +60,9 @@ class RealPlanViewer extends PlanViewer {
 		Schedule s = p.getSchedule();
 		if (s==null) return "-------";
 		StringBuffer out = new StringBuffer("MTWTFSS");
-		boolean[] days = s.getDays();
+		short days = s.getDays();
 		for (int i=0; i<7; i++)
-			if (!days[i]) out.replace(i, i+1, "-");
+			if ((days & (1<<i)) == 0) out.replace(i, i+1, "-");
 		return out.toString();
 	}
 	

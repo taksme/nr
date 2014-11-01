@@ -62,7 +62,7 @@ public class StaticMapRenderer {
 	
 	private void append(Location l) {
 		Report report = l.getLastReport();
-    	long late = report!=null ? report.getTimes().getMinutesDiff() : Long.MAX_VALUE;
+    	long late = (report!=null ? report.getRealDelay() : Long.MAX_VALUE) / 1000;
     	Point p = l.getLocation();
     	append(String.format(
 			"<circle id='%s' cx='%s' cy='%s' r='%s' class='%s'>" +
@@ -95,14 +95,8 @@ public class StaticMapRenderer {
 		));
 		for (Location l : g) {
 			Report report = l.getLastReport();
-	    	long late = report!=null ? report.getTimes().getMinutesDiff() : Long.MAX_VALUE;
+	    	long late = (report!=null ? report.getRealDelay() : Long.MAX_VALUE) / 1000;
 	    	if (late>60*24)
-			append(l);
-		}
-		for (Location l : g) {
-			Report report = l.getLastReport();
-	    	long late = report!=null ? report.getTimes().getMinutesDiff() : Long.MAX_VALUE;
-	    	if (late<=60*24)
 			append(l);
 		}
 		append("</g></svg></section>");

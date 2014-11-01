@@ -1,8 +1,6 @@
 package me.taks.nr.schedule;
 
-import me.taks.nr.HalfMins;
 import me.taks.nr.LocViewer;
-import me.taks.nr.data.Schedule.Plan.PlanLoc;
 
 public class PlanLocViewer {
 	public static PlanLocViewer get(PlanLoc planLoc) {
@@ -12,12 +10,12 @@ public class PlanLocViewer {
 
 	public String getLocation() { return "Unknown Location"; }
 	
-	public static String hmsToHHMMF(short hm) {
+	public static String hmsToHHMMF(int hm) {
 		if (hm<0) return "";
 		else return String.format("%02d:%02d%s", hm/120, (hm%120/2), hm%2==1?"½":"");
 	}
 	
-	public static String firstBracketSecondOrBest(short first, short second) {
+	public static String firstBracketSecondOrBest(int first, int second) {
 		return first<0 ? hmsToHHMMF(second) 
 						: hmsToHHMMF(first) 
 							+ (second>=0 && second!=first ? "(" + hmsToHHMMF(second) + ")" : "");
@@ -47,7 +45,7 @@ class RealPlanLocViewer extends PlanLocViewer {
 	public String getLocation() { return LocViewer.get(pl.getLocation()).getDesc(); }
 	public String getDepartureTimes() {
 		return PlanLocViewer.firstBracketSecondOrBest(
-				HalfMins.toString(pl.getPublicDeparture()), pl.getDepHMs());
+				pl.getPubArrHMs(), pl.getDepHMs());
 	}
 	public String getArrivalTimes() {
 		return PlanLocViewer.firstBracketSecondOrBest(pl.getPubArrHMs(), pl.getArrHMs());

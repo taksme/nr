@@ -1,5 +1,9 @@
 package me.taks.nr;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 public class ReportViewer {
 	public static ReportViewer get(Report report) {
 		if (report==null) return new ReportViewer();
@@ -80,17 +84,28 @@ class RealReportViewer extends ReportViewer {
 	}
 	
 	public String getPerformance(String early, String late, String onTime) {
-		short diff = HalfMins.diff(report.getActual(), report.getExpected());
-		return diff==HalfMins.INVALID ? "?" :
+		long diff = report.getRealDelay();
+		
+		return diff==Long.MAX_VALUE ? "?" :
 				diff==0 ? onTime :
-				HalfMins.toString(diff) + (diff>0 ? late : early);
+				longToTIme(Math.abs(diff));
 	}
 	
 	public String getHeadcode() {
 		return report.getTrainId()!=null ? report.getTrainId().substring(2,6) : "xxxx";
 	}
 	
+	private static SimpleDateFormat sdf;
+	static {
+		sdf = new SimpleDateFormat("kk:mm");
+		sdf.setTimeZone(TimeZone.getTimeZone("Europe/London"));
+	}
+	
+	private static String longToTIme(long time) {
+		return sdf.format(new Date(time)) + (time%1000>0 ? "½" : "");
+	}
+	
 	public String getExpectedTime() {
-		return HalfMins.toString(report.getExpected());
+		return longToTIme(report.getExpected());
 	}
 }

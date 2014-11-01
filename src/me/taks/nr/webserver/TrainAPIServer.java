@@ -38,7 +38,7 @@ public class TrainAPIServer {
 	
 	public void append(Collection<Train> trains) {
 		for (Train t : trains) {
-			"," + append(t.toJSONString());
+//			append("," + t.toJSONString());
 		}
 		overFirst('[');
 		append("]");
@@ -46,7 +46,7 @@ public class TrainAPIServer {
 	
 	public HttpResponse handle(HttpRequest req) {
 		final String uri = req.getUri();
-    	append(locations, uri.equals("/locations/mappable"));
+   // 	append(locations, uri.equals("/locations/mappable"));
 		ByteBuf buffer = Unpooled.copiedBuffer(out, CharsetUtil.UTF_8);
         FullHttpResponse res = new DefaultFullHttpResponse(HTTP_1_1, OK);
         res.headers().set(CONTENT_TYPE, "application/json; charset=UTF-8");

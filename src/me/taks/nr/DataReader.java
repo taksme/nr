@@ -1,8 +1,6 @@
 package me.taks.nr;
 
-import java.util.Calendar;
 import java.util.Properties;
-import java.util.TimeZone;
 
 import javax.jms.Connection;
 import javax.jms.ExceptionListener;
@@ -29,18 +27,6 @@ public class DataReader implements ExceptionListener, Runnable {
 		this.props = props;
 	}
 	
-	private static final TimeZone GMTBST = TimeZone.getTimeZone("Europe/London");
-	
-	private static long getStartOfDay(Long millis) {
-		Calendar cal = Calendar.getInstance(GMTBST);
-		cal.setTimeInMillis(millis);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-	    cal.set(Calendar.MINUTE, 0);
-	    cal.set(Calendar.SECOND, 0);
-	    cal.set(Calendar.MILLISECOND, 0);
-	    return millis - cal.getTimeInMillis();
-	}
-	
 	protected void handleReportMessage(String message) {
 		JSONArray array = new JSONArray(message);
 		for (int j=array.length()-1; j>=0; j--) try {
@@ -62,12 +48,8 @@ public class DataReader implements ExceptionListener, Runnable {
 							Event.NONE
 			);
 
-			long expected = o.getQuotedLongOr0("planned_timestamp"), 
-					actual = o.getQuotedLongOr0("actual_timestamp"), 
-					dayStart = getStartOfDay(expected>0 ? expected : actual);
-
-			if (expected>0) r.setExpected(HalfMins.parse(expected, dayStart));
-			if (actual>0) r.setExpected(HalfMins.parse(actual, dayStart));
+			r.setExpected(o.getQuotedLongOr0("planned_timestamp"));
+			r.setExpected(o.getQuotedLongOr0("actual_timestamp"));
 			
 			r.ready();
 			

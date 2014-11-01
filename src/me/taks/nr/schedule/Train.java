@@ -2,8 +2,6 @@ package me.taks.nr.schedule;
 
 import java.util.ArrayList;
 
-import me.taks.nr.data.Schedule.Plan;
-
 public class Train {
 	public String id;
 	public String headcode;
